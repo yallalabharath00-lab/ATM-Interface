@@ -1,0 +1,106 @@
+/* Reset and base */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1d2b64, #f8cdda);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.atm-container {
+  background: white;
+  border-radius: 15px;
+  padding: 30px 40px;
+  width: 450px;
+  box-shadow: 0 15px 25px rgba(0,0,0,0.3);
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.balance-display {
+  font-size: 1.5rem;
+  margin-bottom: 25px;
+  font-weight: bold;
+  color: #27ae60;
+}
+
+.pin-section {
+  margin-bottom: 25px;
+}
+
+
+.transaction {
+  margin-bottom: 25px;
+  text-align: left;
+}
+
+.transaction h2 {
+  margin-bottom: 10px;
+  color: #34495e;
+  font-weight: 600;
+}
+
+form {
+  display: flex;
+  gap: 10px;
+}
+
+input[type="number"] {
+  flex-grow: 1;
+  padding: 8px 12px;
+  border: 2px solid #bdc3c7;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+input[type="number"]:focus {
+  border-color: #2980b9;
+  outline: none;
+}
+
+button {
+  background-color: #2980b9;
+  border: none;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover:not(:disabled) {
+  background-color: #3498db;
+}
+
+button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.message {
+  font-size: 1rem;
+  margin-top: 10px;
+  min-height: 20px;
+  font-weight: 600;
+}
+
+.message.success {
+  color: #27ae60;
+}
+
+.message.error {
+  color: #e74c3c;
+}

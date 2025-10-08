@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ATM Interface with PIN</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="atm-container">
+    <h1>🏧 ATM Interface</h1>
+    <div class="balance-display">
+      Current Balance: <span id="balance">${{ '%.2f' | format(balance) }}</span>
+    </div>
+
+    <!-- PIN Set or Authentication -->
+    <div id="pin-section" class="pin-section">
+      {% if not pin_set %}
+        <h2>Set your 4-digit PIN</h2>
+        <form id="set-pin-form">
+          <input type="password" name="pin" maxlength="4" pattern="\d{4}" placeholder="Enter 4-digit PIN" required />
+          <button type="submit">Set PIN</button>
+        </form>
+      {% else %}
+        <h2>Enter your PIN to proceed</h2>
+        <form id="auth-pin-form">
+          <input type="password" name="pin" maxlength="4" pattern="\d{4}" placeholder="Enter your PIN" required />
+          <button type="submit">Authenticate</button>
+        </form>
+      {% endif %}
+      <div id="pin-message" class="message"></div>
+    </div>
+
+    <!-- Transaction Forms -->
+    <div id="transactions" style="display:none;">
+      <div class="transaction">
+        <h2>Deposit Money</h2>
+        <form id="deposit-form">
+          <input type="number" step="0.01" min="0" name="amount" placeholder="Amount to deposit" required />
+          <button type="submit">Deposit</button>
+        </form>
+      </div>
+
+      <div class="transaction">
+        <h2>Withdraw Money</h2>
+        <form id="withdraw-form">
+          <input type="number" step="0.01" min="0" name="amount" placeholder="Amount to withdraw" required />
+          <button type="submit">Withdraw</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="message" class="message"></div>
+  </div>
+
+  <script>
+    const pinSection = document.getElementById('pin-section');
+    const pinMessage = document.getElementById('pin-message');
+    const transactionsDiv = document.getElementById('transactions');
+    const balanceDisplay = document.getElementById('balance');
+    const messageDiv = document.getElementById('message');
+
+    // Elements if PIN not set
+    const setPinForm = document.getElementById('set-pin-form');
+    if (setPinForm) {
+      setPinForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        pinMessage.textContent = '';
+        const formData = new FormData(setPinForm);
+        const response = await fetch('/set_pin', { method: 'POST', body: formData });
+        const data = await response.json();
+        if (data.success) {
+          pinMessage.textContent = data.message;
+          pinMessage.className = 'message success';
+          // Show authentication form now without page reload
+          setTimeout(() => {
+            location.reload();  // quick reload to switch to PIN auth form
+          }, 1000);
+        } else {
+          pinMessage.textContent = data.message;
+          pinMessage.className = 'message error';
+        }
+      });
+    }
+
+    // Elements if PIN already set
+    const authPinForm = document.getElementById('auth-pin-form');
+    if (authPinForm) {
+      authPinForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        pinMessage.textContent = '';
+        const formData = new FormData(authPinForm);
+        const response = await fetch('/authenticate_pin', { method: 'POST', body: formData });
+        const data = await response.json();
+        if (data.success) {
+          pinMessage.textContent = data.message;
+          pinMessage.className = 'message success';
+          // Hide PIN form and show transactions
+          pinSection.style.display = 'none';
+          transactionsDiv.style.display = 'block';
+          messageDiv.textContent = '';
+        } else {
+          pinMessage.textContent = data.message;
+          pinMessage.className = 'message error';
+        }
+      });
+    }
+
+    // Deposit
+    const depositForm = document.getElementById('deposit-form');
+    depositForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      messageDiv.textContent = '';
+      const formData = new FormData(depositForm);
+      const response = await fetch('/deposit', { method: 'POST', body: formData });
+      const data = await response.json();
+      if (data.success) {
+        balanceDisplay.textContent = `$${data.balance.toFixed(2)}`;
+        messageDiv.textContent = data.message;
+        messageDiv.className = 'message success';
+        depositForm.reset();
+        // After transaction, require PIN again
+        transactionsDiv.style.display = 'none';
+        pinSection.style.display = 'block';
+        pinMessage.textContent = '';
+        authPinForm.reset();
+      } else {
+        messageDiv.textContent = data.message;
+        messageDiv.className = 'message error';
+      }
+    });
+
+    // Withdraw
+    const withdrawForm = document.getElementById('withdraw-form');
+    withdrawForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      messageDiv.textContent = '';
+      const formData = new FormData(withdrawForm);
+      const response = await fetch('/withdraw', { method: 'POST', body: formData });
+      const data = await response.json();
+      if (data.success) {
+        balanceDisplay.textContent = `$${data.balance.toFixed(2)}`;
+        messageDiv.textContent = data.message;
+        messageDiv.className = 'message success';
+        withdrawForm.reset();
+        // After transaction, require PIN again
+        transactionsDiv.style.display = 'none';
+        pinSection.style.display = 'block';
+        pinMessage.textContent = '';
+        authPinForm.reset();
+      } else {
+        messageDiv.textContent = data.message;
+        messageDiv.className = 'message error';
+      }
+    });
+  </script>
+</body>
+</html>
